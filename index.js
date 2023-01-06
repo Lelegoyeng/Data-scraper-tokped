@@ -1,49 +1,33 @@
-const puppeteer = require('puppeteer');
-const cheerio = require('cheerio');
-const randomUseragent = require('random-useragent');
+const express = require('express')
+require('dotenv').config()
+const { MongoClient } = require("mongodb");
 
-(async () => {
-    const url = "https://www.tokopedia.com/search?st=product&q=laptop";
-    const randomAgent = randomUseragent.getRandom();
-    const browser = await puppeteer.launch({
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-        ],
-    });
-    const context = await browser.createIncognitoBrowserContext();//mode penyamaran
-    const page = await context.newPage();//membuat tab baru
-    await page.setJavaScriptEnabled(true);//aktifkan javascript
-    await page.setUserAgent(randomAgent);//setting user agent
-    await page.goto(url, { waituntil: 'domcontentloaded', timeout: 0 });//tunggu proses dom/load pagenya selesai
-    //await page.screenshot({ path: 'screenshot.png' })
-    //mendapatkan isi tag html body
-    const body = await page.evaluate(() => {
-        return document.querySelector('body').innerHTML;
-    });
 
-    //console.log(body);
+const app = express()
+const port = 3000
+const url = process.env.url;
+const client = new MongoClient(url);
+const dbName = "test";
 
-    const $ = cheerio.load(body);
-    const listItems = $('[data-testid="master-product-card"]');
- 
-    var resulst = [];
-    listItems.each(function (idx, el) {
-        var nama = $('[data-testid="spnSRPProdName"]', el).text();
-        var harga = $('[data-testid="spnSRPProdPrice"]', el).text();
-        var link = $('a[href]', el).attr("href");
-        if (harga != null && harga != "") {
-            resulst.push({
-                "nama": nama,
-                "harga": harga,
-                "link": link
-            });
-        }
- 
-    });
- 
-    console.log(resulst);
 
-    // await page.screenshot({path: 'ss.png'})
-    await browser.close();//close browser puppeteer jika sudah selesai
-})();
+app.get('/proxy', (req, res) => {
+
+(async ()=> {
+    await client.connect();
+    const db = client.db(dbName);
+    const col = db.collection("proxy");
+
+    const p = await col.find({}).toArray(function(err, result) {
+        if (err) throw err;
+        
+  res.json(result)
+        db.close();
+      });
+})()
+
+
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})

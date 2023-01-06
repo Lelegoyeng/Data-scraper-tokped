@@ -77,7 +77,7 @@ const run = (async () => {
         tport = tport + 1
         level++
         run()
-      }, 1000)
+      }, 1)
     })
 })
 
