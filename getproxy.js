@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 require('dotenv').config()
 const { MongoClient } = require("mongodb");
 
+
 const url = process.env.url;
 const client = new MongoClient(url);
 const dbName = "test";
@@ -11,6 +12,7 @@ const dbName = "test";
 let barray = 7
 let tip = 1
 let tport = 2
+let checkdb = false
 
 function one() {
   return new Promise(async resolve => {
@@ -39,6 +41,11 @@ function one() {
     await client.connect();
     const db = client.db(dbName);
     const col = db.collection("proxy");
+
+    if(checkdb === false){
+      db.dropCollection('proxy')
+      checkdb = true
+    }
 
     let personDocument = {
       "ip": data[barray + tip],
