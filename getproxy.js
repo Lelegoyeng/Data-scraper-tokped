@@ -71,7 +71,7 @@ function one() {
 
 let level = 1
 // let temp = 2557
-let temp = 2557
+let temp = 1000
 
 const run = (async () => {
   await Promise.all([one()])
